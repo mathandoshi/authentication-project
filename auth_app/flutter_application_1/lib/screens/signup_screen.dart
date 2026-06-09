@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
+import '../widgets/auth_shell.dart';
 import 'verify_email_screen.dart';
 
 class SignupScreen extends StatefulWidget {
@@ -13,15 +14,25 @@ class _SignupScreenState extends State<SignupScreen> {
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final TextEditingController confirmPasswordController = TextEditingController();
+  final TextEditingController confirmPasswordController =
+      TextEditingController();
 
   bool isLoading = false;
 
+  @override
+  void dispose() {
+    usernameController.dispose();
+    emailController.dispose();
+    passwordController.dispose();
+    confirmPasswordController.dispose();
+    super.dispose();
+  }
+
   Future<void> register() async {
     if (passwordController.text != confirmPasswordController.text) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Passwords do not match")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Passwords do not match")));
       return;
     }
 
@@ -39,26 +50,22 @@ class _SignupScreenState extends State<SignupScreen> {
       if (result['success'] == true) {
         if (!mounted) return;
 
-        // 🚀 SEND OTP AND OPEN OTP SCREEN
-        await ApiService.sendOtp(emailController.text.trim());
-
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => VerifyEmailScreen(
-              email: emailController.text.trim(),
-            ),
+            builder: (_) =>
+                VerifyEmailScreen(email: emailController.text.trim()),
           ),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(result['message'])),
+          SnackBar(content: Text(result['message'] ?? "Registration failed")),
         );
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error: $e")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Error: $e")));
     }
 
     setState(() {
@@ -68,55 +75,64 @@ class _SignupScreenState extends State<SignupScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const SizedBox(height: 100),
-
-              const Text(
-                "Sign Up",
-                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-              ),
-
-              const SizedBox(height: 20),
-
-              TextField(
-                controller: usernameController,
-                decoration: const InputDecoration(labelText: "Username"),
-              ),
-
-              TextField(
-                controller: emailController,
-                decoration: const InputDecoration(labelText: "Email"),
-              ),
-
-              TextField(
-                controller: passwordController,
-                obscureText: true,
-                decoration: const InputDecoration(labelText: "Password"),
-              ),
-
-              TextField(
-                controller: confirmPasswordController,
-                obscureText: true,
-                decoration: const InputDecoration(labelText: "Confirm Password"),
-              ),
-
-              const SizedBox(height: 20),
-
-              ElevatedButton(
-                onPressed: isLoading ? null : register,
-                child: isLoading
-                    ? const CircularProgressIndicator()
-                    : const Text("Sign Up"),
-              ),
-            ],
+    return AuthShell(
+      icon: Icons.person_add_alt_1_rounded,
+      title: "Create account",
+      subtitle: "Set up your profile and verify your email in one clean flow.",
+      children: [
+        TextField(
+          controller: usernameController,
+          textInputAction: TextInputAction.next,
+          decoration: authInputDecoration(
+            label: "Username",
+            icon: Icons.person_outline,
           ),
         ),
+        const SizedBox(height: 14),
+        TextField(
+          controller: emailController,
+          keyboardType: TextInputType.emailAddress,
+          textInputAction: TextInputAction.next,
+          decoration: authInputDecoration(
+            label: "Email",
+            icon: Icons.alternate_email,
+          ),
+        ),
+        const SizedBox(height: 14),
+        TextField(
+          controller: passwordController,
+          obscureText: true,
+          textInputAction: TextInputAction.next,
+          decoration: authInputDecoration(
+            label: "Password",
+            icon: Icons.key_outlined,
+          ),
+        ),
+        const SizedBox(height: 14),
+        TextField(
+          controller: confirmPasswordController,
+          obscureText: true,
+          textInputAction: TextInputAction.done,
+          onSubmitted: (_) {
+            if (!isLoading) register();
+          },
+          decoration: authInputDecoration(
+            label: "Confirm password",
+            icon: Icons.verified_user_outlined,
+          ),
+        ),
+        const SizedBox(height: 22),
+        AuthPrimaryButton(
+          label: "Sign up",
+          icon: Icons.auto_awesome_rounded,
+          isLoading: isLoading,
+          onPressed: register,
+        ),
+      ],
+      footer: TextButton.icon(
+        onPressed: () => Navigator.pop(context),
+        icon: const Icon(Icons.arrow_back_rounded),
+        label: const Text("Back to login"),
       ),
     );
   }

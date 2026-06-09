@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 import '../services/auth_service.dart';
+import '../widgets/auth_shell.dart';
 import 'home_screen.dart';
 
 class VerifyEmailScreen extends StatefulWidget {
@@ -17,6 +18,12 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
 
   bool isLoading = false;
   String message = "";
+
+  @override
+  void dispose() {
+    otpController.dispose();
+    super.dispose();
+  }
 
   Future<void> verifyOtp() async {
     setState(() {
@@ -56,45 +63,60 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("Verify OTP")),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text("OTP sent to: ${widget.email}"),
-
-            TextField(
-              controller: otpController,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: "Enter OTP",
+    return AuthShell(
+      icon: Icons.verified_rounded,
+      title: "Verify your email",
+      subtitle: "Enter the OTP sent to ${widget.email}.",
+      children: [
+        TextField(
+          controller: otpController,
+          keyboardType: TextInputType.number,
+          textInputAction: TextInputAction.done,
+          onSubmitted: (_) {
+            if (!isLoading) verifyOtp();
+          },
+          decoration: authInputDecoration(
+            label: "OTP",
+            icon: Icons.pin_outlined,
+          ),
+        ),
+        const SizedBox(height: 22),
+        AuthPrimaryButton(
+          label: "Verify OTP",
+          icon: Icons.task_alt_rounded,
+          isLoading: isLoading,
+          onPressed: verifyOtp,
+        ),
+        const SizedBox(height: 8),
+        TextButton.icon(
+          onPressed: resendOtp,
+          icon: const Icon(Icons.refresh_rounded),
+          label: const Text("Resend OTP"),
+        ),
+        if (message.isNotEmpty) ...[
+          const SizedBox(height: 10),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFFF7ED),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: const Color(0xFFFED7AA)),
+            ),
+            child: Text(
+              message,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Color(0xFF9A3412),
+                fontWeight: FontWeight.w600,
               ),
             ),
-
-            const SizedBox(height: 20),
-
-            ElevatedButton(
-              onPressed: isLoading ? null : verifyOtp,
-              child: isLoading
-                  ? const CircularProgressIndicator()
-                  : const Text("Verify OTP"),
-            ),
-
-            TextButton(
-              onPressed: resendOtp,
-              child: const Text("Resend OTP"),
-            ),
-
-            const SizedBox(height: 10),
-
-            Text(
-              message,
-              style: const TextStyle(color: Colors.red),
-            ),
-          ],
-        ),
+          ),
+        ],
+      ],
+      footer: TextButton.icon(
+        onPressed: () => Navigator.pop(context),
+        icon: const Icon(Icons.arrow_back_rounded),
+        label: const Text("Back"),
       ),
     );
   }
