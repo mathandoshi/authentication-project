@@ -26,7 +26,8 @@ def login_user(request):
 
         print("OTP CREATED")
 
-        send_otp(user.email, otp)
+       print("OTP:", otp)
+# send_otp(user.email, otp)
 
         print("EMAIL SENT")
 
