@@ -3,8 +3,7 @@ import 'package:http/http.dart' as http;
 
 class ApiService {
 static const String baseUrl =
-    "https://authentication-project-e04g.onrender.com";
-
+    "https://authentication-project-e04g.onrender.com/api";
   // LOGIN
   static Future<Map<String, dynamic>> login(
     String username,
