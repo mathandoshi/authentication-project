@@ -26,12 +26,10 @@ SECRET_KEY = 'django-insecure-=7r$h4ltzk=s%x9z-)tni*huf9_2!f%q#ecbnnr7-1gv13$&zq
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    '127.0.0.1',
-    'localhost',
-    '10.0.2.2',
-    '192.168.91.19',
+    "authentication-project-e04g.onrender.com",
+    "localhost",
+    "127.0.0.1",
 ]
-
 
 # Application definition
 
