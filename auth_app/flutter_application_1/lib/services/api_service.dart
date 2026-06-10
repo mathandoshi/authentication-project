@@ -2,8 +2,9 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class ApiService {
-static const String baseUrl =
-    "https://authentication-project-e04g.onrender.com/api";
+  static const String baseUrl =
+      "https://authentication-project-e04g.onrender.com/api";
+
   // LOGIN
   static Future<Map<String, dynamic>> login(
     String username,
@@ -17,6 +18,9 @@ static const String baseUrl =
         'password': password,
       }),
     );
+
+    print("STATUS: ${response.statusCode}");
+    print("BODY: ${response.body}");
 
     return jsonDecode(response.body);
   }
