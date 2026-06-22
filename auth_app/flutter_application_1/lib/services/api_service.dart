@@ -2,8 +2,27 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class ApiService {
-  static const String baseUrl =
-      "https://authentication-project-e04g.onrender.com/api";
+  static const String baseUrl = "http://10.0.2.2:8000/api";
+
+  static Map<String, dynamic> _decodeResponse(http.Response response) {
+    try {
+      final decoded = jsonDecode(response.body);
+      if (decoded is Map<String, dynamic>) {
+        return decoded;
+      }
+
+      return {
+        'success': false,
+        'message': 'Unexpected response from server.',
+      };
+    } on FormatException {
+      return {
+        'success': false,
+        'message':
+            'Server returned an invalid response. Check the Django console.',
+      };
+    }
+  }
 
   // LOGIN
   static Future<Map<String, dynamic>> login(
@@ -22,7 +41,7 @@ class ApiService {
     print("STATUS: ${response.statusCode}");
     print("BODY: ${response.body}");
 
-    return jsonDecode(response.body);
+    return _decodeResponse(response);
   }
 
   // REGISTER
@@ -41,7 +60,7 @@ class ApiService {
       }),
     );
 
-    return jsonDecode(response.body);
+    return _decodeResponse(response);
   }
 
   // SEND OTP
@@ -56,7 +75,7 @@ class ApiService {
       }),
     );
 
-    return jsonDecode(response.body);
+    return _decodeResponse(response);
   }
 
   // VERIFY OTP
@@ -73,7 +92,7 @@ class ApiService {
       }),
     );
 
-    return jsonDecode(response.body);
+    return _decodeResponse(response);
   }
 
   // FORGOT PASSWORD
@@ -88,7 +107,7 @@ class ApiService {
       }),
     );
 
-    return jsonDecode(response.body);
+    return _decodeResponse(response);
   }
 
   // RESET PASSWORD
@@ -103,10 +122,10 @@ class ApiService {
       body: jsonEncode({
         'email': email,
         'otp': otp,
-        'password': password,
+        'new_password': password,
       }),
     );
 
-    return jsonDecode(response.body);
+    return _decodeResponse(response);
   }
 }
